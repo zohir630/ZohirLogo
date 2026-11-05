@@ -1,10 +1,6 @@
 name: Unzip Project
 on:
   workflow_dispatch:
-    inputs:
-      zip_name:
-        description: "ZIP file name in repo root"
-        default: "ed58ac80-ai-logo-maker-skill-Zohir.zip"
 permissions:
   contents: write
 jobs:
@@ -15,7 +11,10 @@ jobs:
       - name: Unzip
         run: |
           set -e
-          ZIP="${{ github.event.inputs.zip_name }}"
+          ls -la
+          ZIP=$(ls *.zip 2>/dev/null | head -n1)
+          if [ -z "$ZIP" ]; then echo "রিপোর মূল ফোল্ডারে কোনো .zip ফাইল নেই। আগে ZIP আপলোড করুন।"; exit 1; fi
+          echo "Unzipping: $ZIP"
           mkdir -p /tmp/x
           unzip -q -o "$ZIP" -d /tmp/x
           TOP=$(ls -A /tmp/x | head -n1)
