@@ -1,0 +1,32 @@
+name: Unzip Project
+on:
+  workflow_dispatch:
+    inputs:
+      zip_name:
+        description: "ZIP file name in repo root"
+        default: "ed58ac80-ai-logo-maker-skill-Zohir.zip"
+permissions:
+  contents: write
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip
+        run: |
+          set -e
+          ZIP="${{ github.event.inputs.zip_name }}"
+          mkdir -p /tmp/x
+          unzip -q -o "$ZIP" -d /tmp/x
+          TOP=$(ls -A /tmp/x | head -n1)
+          if [ "$(ls -A /tmp/x | wc -l)" = "1" ] && [ -d "/tmp/x/$TOP" ]; then SRC="/tmp/x/$TOP"; else SRC=/tmp/x; fi
+          rm -rf "$SRC/.github"
+          cp -a "$SRC"/. .
+          rm -f "$ZIP"
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Unzip project" || echo "nothing to commit"
+          git push
